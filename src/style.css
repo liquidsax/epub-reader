@@ -18,9 +18,9 @@
   --accent-hover: #4f46e5;
   --accent-soft: #eef2ff;
   --accent-glow: rgba(99, 102, 241, 0.15);
-  --translation-bg: #f0fdf4;
-  --translation-border: #86efac;
-  --translation-text: #15803d;
+  --translation-bg: #f0f4ff;
+  --translation-border: #6366f1;
+  --translation-text: #1e293b;
   --danger: #ef4444;
   --danger-hover: #dc2626;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -57,9 +57,9 @@
   --accent-hover: #6366f1;
   --accent-soft: rgba(129, 140, 248, 0.1);
   --accent-glow: rgba(129, 140, 248, 0.2);
-  --translation-bg: rgba(34, 197, 94, 0.08);
-  --translation-border: rgba(34, 197, 94, 0.3);
-  --translation-text: #86efac;
+  --translation-bg: rgba(99, 102, 241, 0.06);
+  --translation-border: rgba(129, 140, 248, 0.5);
+  --translation-text: #e2e8f0;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
@@ -552,11 +552,13 @@ textarea {
   display: block;
   margin-top: 0.6em;
   padding: 0.6rem 0 0.6rem 1.2rem;
-  border-left: 3px solid var(--translation-border);
+  border-left: 4px solid var(--translation-border);
   background: none;
   color: var(--translation-text);
-  font-size: inherit;
-  line-height: 1.9;
+  font-family: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+  font-size: 1.08rem;
+  line-height: 2;
+  font-weight: 500;
   animation: slideIn 0.3s var(--ease-out);
 }
 
