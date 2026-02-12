@@ -1,17 +1,78 @@
 {
-  "name": "epub-reader",
-  "version": "1.0.0",
+  "name": "bireader",
+  "productName": "BiReader",
+  "version": "0.1.0-beta",
+  "description": "BiReader — EPUB 双语翻译阅读器 | Bilingual EPUB Translation Reader",
+  "author": "BiReader Team",
+  "license": "MIT",
   "type": "module",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:dev": "npm run build && electron .",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:all": "npm run build && electron-builder --mac --win"
+  },
+  "build": {
+    "appId": "com.bireader.app",
+    "productName": "BiReader",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.education",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": null
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": null
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerLanguages": [
+        "zh_CN",
+        "en_US"
+      ],
+      "language": 2052
+    }
   },
   "dependencies": {
     "epubjs": "^0.3.93",
     "jszip": "^3.10.1"
   },
   "devDependencies": {
+    "electron": "^34.1.1",
+    "electron-builder": "^25.1.8",
     "vite": "^6.1.0"
   }
 }
