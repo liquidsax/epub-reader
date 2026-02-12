@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EPUB 双语翻译阅读器</title>
+  <meta name="description" content="基于豆包和硅基流动 API 的 EPUB 双语沉浸式翻译阅读器" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+  <!-- Upload Screen -->
+  <div id="upload-screen" class="screen active">
+    <div class="upload-actions">
+      <button id="btn-theme-toggle-upload" class="toolbar-btn" title="切换主题">
+        <svg class="icon-sun-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5" />
+          <path
+            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+        </svg>
+        <svg class="icon-moon-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="display:none">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+        </svg>
+      </button>
+      <button id="btn-settings-upload" class="toolbar-btn" title="设置">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+        </svg>
+      </button>
+    </div>
+    <div class="upload-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="4" width="28" height="40" rx="3" stroke="currentColor" stroke-width="2.5" fill="none" />
+            <rect x="14" y="8" width="28" height="40" rx="3" stroke="currentColor" stroke-width="2.5" fill="none"
+              opacity="0.5" />
+            <line x1="12" y1="14" x2="28" y2="14" stroke="currentColor" stroke-width="2" opacity="0.6" />
+            <line x1="12" y1="20" x2="28" y2="20" stroke="currentColor" stroke-width="2" opacity="0.4" />
+            <line x1="12" y1="26" x2="24" y2="26" stroke="currentColor" stroke-width="2" opacity="0.3" />
+          </svg>
+        </div>
+        <h1>BiRead</h1>
+        <p class="brand-subtitle">EPUB 双语沉浸式翻译阅读器</p>
+      </div>
+      <div id="drop-zone" class="drop-zone">
+        <div class="drop-zone-content">
+          <svg class="drop-icon" viewBox="0 0 64 64" fill="none">
+            <path d="M32 8v36M18 30l14 14 14-14" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <path d="M8 48v4a4 4 0 004 4h40a4 4 0 004-4v-4" stroke="currentColor" stroke-width="3"
+              stroke-linecap="round" />
+          </svg>
+          <p class="drop-text">拖拽 EPUB 文件到这里</p>
+          <p class="drop-hint">或者点击选择文件</p>
+        </div>
+        <input type="file" id="file-input" accept=".epub" hidden />
+      </div>
+      <div class="upload-features">
+        <div class="feature-card">
+          <span class="feature-icon">🔄</span>
+          <span>双 API 引擎</span>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📖</span>
+          <span>沉浸式双语</span>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">💾</span>
+          <span>翻译缓存</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reader Screen -->
+  <div id="reader-screen" class="screen">
+    <!-- Top Toolbar -->
+    <header id="toolbar" class="toolbar">
+      <div class="toolbar-left">
+        <button id="btn-sidebar-toggle" class="toolbar-btn" title="目录">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+        <h2 id="book-title" class="book-title">Book Title</h2>
+      </div>
+      <div class="toolbar-right">
+        <button id="btn-translate-chapter" class="toolbar-btn primary-btn" title="翻译当前章节">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" />
+          </svg>
+          <span>翻译本章</span>
+        </button>
+        <button id="btn-theme-toggle" class="toolbar-btn" title="切换主题">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5" />
+            <path
+              d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            style="display:none">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+          </svg>
+        </button>
+        <button id="btn-settings" class="toolbar-btn" title="设置">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+          </svg>
+        </button>
+        <button id="btn-back" class="toolbar-btn" title="返回">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 5l-7 7 7 7" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <h3>目录</h3>
+        <button id="btn-sidebar-close" class="toolbar-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <nav id="toc-list" class="toc-list"></nav>
+    </aside>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Reading Area -->
+    <main id="reading-area" class="reading-area">
+      <div id="chapter-content" class="chapter-content"></div>
+      <div class="chapter-nav">
+        <button id="btn-prev-chapter" class="chapter-nav-btn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          上一章
+        </button>
+        <span id="chapter-indicator" class="chapter-indicator"></span>
+        <button id="btn-next-chapter" class="chapter-nav-btn" disabled>
+          下一章
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>设置</h3>
+        <button id="btn-settings-close" class="toolbar-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-section">
+          <h4>翻译引擎</h4>
+          <div class="setting-group">
+            <label>选择引擎</label>
+            <div class="engine-tabs">
+              <button class="engine-tab active" data-engine="doubao">豆包</button>
+              <button class="engine-tab" data-engine="siliconflow">硅基流动</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="doubao-settings" class="settings-section engine-settings">
+          <h4>豆包 API 配置</h4>
+          <div class="setting-group">
+            <label for="doubao-key">API Key</label>
+            <input type="password" id="doubao-key" placeholder="请输入豆包 API Key" />
+          </div>
+          <div class="setting-group">
+            <label for="doubao-endpoint">Endpoint</label>
+            <input type="text" id="doubao-endpoint" value="https://ark.cn-beijing.volces.com/api/v3" />
+          </div>
+          <div class="setting-group">
+            <label for="doubao-model">模型 (Endpoint ID)</label>
+            <input type="text" id="doubao-model" placeholder="例如: ep-xxxxx-xxxxx" />
+          </div>
+        </div>
+
+        <div id="siliconflow-settings" class="settings-section engine-settings" style="display:none">
+          <h4>硅基流动 API 配置</h4>
+          <div class="setting-group">
+            <label for="sf-key">API Key</label>
+            <input type="password" id="sf-key" placeholder="请输入硅基流动 API Key" />
+          </div>
+          <div class="setting-group">
+            <label for="sf-endpoint">Endpoint</label>
+            <input type="text" id="sf-endpoint" value="https://api.siliconflow.cn/v1" />
+          </div>
+          <div class="setting-group">
+            <label for="sf-model">模型</label>
+            <select id="sf-model">
+              <option value="Qwen/Qwen2.5-7B-Instruct">Qwen2.5-7B-Instruct</option>
+              <option value="Qwen/Qwen2.5-32B-Instruct">Qwen2.5-32B-Instruct</option>
+              <option value="Qwen/Qwen2.5-72B-Instruct">Qwen2.5-72B-Instruct</option>
+              <option value="deepseek-ai/DeepSeek-V3" selected>DeepSeek-V3</option>
+              <option value="deepseek-ai/DeepSeek-R1">DeepSeek-R1</option>
+              <option value="THUDM/glm-4-9b-chat">GLM-4-9B-Chat</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h4>翻译偏好</h4>
+          <div class="setting-group">
+            <label for="source-lang">源语言</label>
+            <select id="source-lang">
+              <option value="English" selected>English</option>
+              <option value="Japanese">日本語</option>
+              <option value="Korean">한국어</option>
+              <option value="French">Français</option>
+              <option value="German">Deutsch</option>
+              <option value="Spanish">Español</option>
+              <option value="auto">自动检测</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="target-lang">目标语言</label>
+            <select id="target-lang">
+              <option value="简体中文" selected>简体中文</option>
+              <option value="繁體中文">繁體中文</option>
+              <option value="English">English</option>
+              <option value="日本語">日本語</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="translation-style">翻译风格</label>
+            <select id="translation-style">
+              <option value="faithful" selected>信达雅 — 忠实原文</option>
+              <option value="natural">自然流畅 — 意译优先</option>
+              <option value="academic">学术严谨 — 保留术语</option>
+              <option value="literary">文学优美 — 注重文采</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h4>缓存管理</h4>
+          <div class="setting-group">
+            <button id="btn-clear-cache" class="danger-btn">清除所有翻译缓存</button>
+            <p class="setting-hint" id="cache-info">加载中...</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-settings-save" class="primary-btn">保存设置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Translation Progress Toast -->
+  <div id="translation-toast" class="toast">
+    <div class="toast-content">
+      <div class="toast-spinner"></div>
+      <span id="toast-text">翻译中...</span>
+    </div>
+    <button id="btn-cancel-translate" class="toast-btn">取消</button>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
