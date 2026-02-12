@@ -65,6 +65,30 @@
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
+/* Sepia / book theme — warm paper tones for eye comfort */
+[data-theme="sepia"] {
+  --bg-primary: #f4ecd8;
+  --bg-secondary: #faf6eb;
+  --bg-tertiary: #ede5cf;
+  --bg-hover: #e6dcc4;
+  --text-primary: #3d3226;
+  --text-secondary: #6b5c4d;
+  --text-tertiary: #9a8a78;
+  --border-color: #d9cdb5;
+  --accent: #a0522d;
+  --accent-hover: #8b4513;
+  --accent-soft: rgba(160, 82, 45, 0.1);
+  --accent-glow: rgba(160, 82, 45, 0.15);
+  --translation-bg: rgba(160, 82, 45, 0.04);
+  --translation-border: #c0926e;
+  --translation-text: #3d3226;
+  --danger: #c0392b;
+  --danger-hover: #a93226;
+  --shadow-sm: 0 1px 3px rgba(80, 60, 30, 0.08);
+  --shadow-md: 0 4px 16px rgba(80, 60, 30, 0.1);
+  --shadow-lg: 0 12px 40px rgba(80, 60, 30, 0.14);
+}
+
 /* --- Reset & Base --- */
 *,
 *::before,

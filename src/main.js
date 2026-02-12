@@ -67,18 +67,24 @@ function initTheme() {
 
 function toggleTheme() {
     const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
+    // Cycle: light → sepia → dark → light
+    const order = ['light', 'sepia', 'dark'];
+    const idx = order.indexOf(current);
+    const next = order[(idx + 1) % 3];
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('biread_theme', next);
     updateThemeIcon(next);
 }
 
 function updateThemeIcon(theme) {
-    // Update icons on both upload and reader screens
-    document.querySelectorAll('[class*="icon-sun"]').forEach(el => {
-        el.style.display = theme === 'dark' ? 'none' : 'block';
+    // Show appropriate icon on all theme toggle buttons
+    document.querySelectorAll('.icon-sun').forEach(el => {
+        el.style.display = theme === 'light' ? 'block' : 'none';
     });
-    document.querySelectorAll('[class*="icon-moon"]').forEach(el => {
+    document.querySelectorAll('.icon-book').forEach(el => {
+        el.style.display = theme === 'sepia' ? 'block' : 'none';
+    });
+    document.querySelectorAll('.icon-moon').forEach(el => {
         el.style.display = theme === 'dark' ? 'block' : 'none';
     });
 }

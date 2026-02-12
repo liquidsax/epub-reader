@@ -26,25 +26,49 @@ export function initReader(container, onProgress) {
 /**
  * Split text into sentences
  * Handles English (.!?) and Chinese (。！？) punctuation
+ * Avoids false splits on: numbered lists (1. 2.), decimals (3.14),
+ * abbreviations (Mr. Dr. etc.)
  */
 function splitSentences(text) {
     if (!text || !text.trim()) return [];
 
-    // Split on sentence-ending punctuation
-    // Keep the punctuation with the sentence
-    const parts = text.match(/[^.!?。！？]+[.!?。！？]+[\s]*/g);
+    const trimmed = text.trim();
+
+    // If text is short (< 80 chars), don't split — keep as one unit
+    if (trimmed.length < 80) return [trimmed];
+
+    // Protect non-sentence periods with placeholders
+    let processed = trimmed;
+
+    // Protect numbered lists: "1." "2." "10." etc.
+    processed = processed.replace(/(\d+)\./g, '$1\x00');
+
+    // Protect common abbreviations
+    const abbrevs = ['Mr', 'Mrs', 'Ms', 'Dr', 'Prof', 'Sr', 'Jr', 'vs', 'etc', 'i\\.e', 'e\\.g', 'Vol', 'No', 'Fig'];
+    abbrevs.forEach(abbr => {
+        const re = new RegExp(`(${abbr})\\.`, 'gi');
+        processed = processed.replace(re, '$1\x00');
+    });
+
+    // Protect decimal numbers: "3.14" "0.5"
+    processed = processed.replace(/(\d)\.([\d])/g, '$1\x00$2');
+
+    // Now split on real sentence-ending punctuation
+    // Match: content + punctuation + optional space
+    const parts = processed.match(/[^.!?。！？]+[.!?。！？]+[\s]*/g);
 
     if (!parts) {
-        // No sentence punctuation found — return whole text as one sentence
-        return [text.trim()];
+        return [trimmed];
     }
 
-    // Clean up and filter empty parts
-    const sentences = parts.map(s => s.trim()).filter(s => s.length > 0);
+    // Restore placeholders and clean up
+    const sentences = parts
+        .map(s => s.replace(/\x00/g, '.').trim())
+        .filter(s => s.length > 0);
 
-    // If there's trailing text after the last punctuation, append it
-    const joined = sentences.join('');
-    const remainder = text.slice(joined.length).trim();
+    // Handle trailing text after last punctuation
+    const joinedLength = parts.join('').length;
+    const remainder = processed.slice(joinedLength).replace(/\x00/g, '.').trim();
     if (remainder) {
         sentences.push(remainder);
     }
