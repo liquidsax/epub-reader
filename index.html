@@ -109,6 +109,13 @@
           </svg>
           <span>翻译本章</span>
         </button>
+        <button id="btn-translate-book" class="toolbar-btn" title="翻译整本书并导出 EPUB">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+            <path d="M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15z" />
+            <path d="M9 10h6M12 7v6" />
+          </svg>
+        </button>
         <div class="display-mode-switcher">
           <button id="btn-display-mode" class="toolbar-btn" title="显示模式">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -271,6 +278,23 @@
         </div>
 
         <div class="settings-section">
+          <h4>阅读显示</h4>
+          <div class="setting-group">
+            <label for="reading-font">阅读字体</label>
+            <select id="reading-font">
+              <option value="default">系统默认 (Inter)</option>
+              <option value="'Georgia', serif">Georgia</option>
+              <option value="Arial, Helvetica, sans-serif">Arial</option>
+              <option value="'Microsoft YaHei', '微软雅黑', sans-serif">微软雅黑</option>
+              <option value="'PingFang SC', 'STHeiti', sans-serif">苹方 (PingFang SC)</option>
+              <option value="'Noto Serif SC', 'Songti SC', 'STSong', serif">宋体 (Noto Serif SC)</option>
+              <option value="'KaiTi', 'STKaiti', 'AR PL UKai', serif">楷体 (KaiTi)</option>
+              <option value="'Source Han Sans SC', 'Noto Sans SC', sans-serif">思源黑体</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-section">
           <h4>翻译偏好</h4>
           <div class="setting-group">
             <label for="source-lang">源语言</label>
@@ -325,6 +349,36 @@
       <span id="toast-text">翻译中...</span>
     </div>
     <button id="btn-cancel-translate" class="toast-btn">取消</button>
+  </div>
+
+  <!-- Full-Book Translation Modal -->
+  <div id="fullbook-modal" class="modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>📚 翻译整本书</h3>
+        <button id="btn-fullbook-close" class="toolbar-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">逐章翻译全书，完成后自动下载双语 EPUB
+          文件。翻译过程中可随时取消。</p>
+        <div id="fullbook-progress-area" style="display:none;">
+          <div class="progress-bar-container">
+            <div id="fullbook-progress-bar" class="progress-bar" style="width: 0%;"></div>
+          </div>
+          <p id="fullbook-status" class="setting-hint" style="margin-top: 0.5rem;">准备中...</p>
+        </div>
+      </div>
+      <div class="modal-footer" style="gap: 0.5rem;">
+        <button id="btn-fullbook-cancel" class="danger-btn" style="display:none;">取消翻译</button>
+        <button id="btn-fullbook-start" class="primary-btn">开始翻译</button>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="/src/main.js"></script>

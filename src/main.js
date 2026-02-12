@@ -8,6 +8,7 @@ import './style.css';
 import { loadBook, getChapters, getChapterContent, getChapterCount, getBookId } from './lib/epubParser.js';
 import { initReader, renderChapter, translateCurrentChapter, cancelTranslation } from './lib/reader.js';
 import { loadSettings, saveSettings, isConfigured, getCacheStats, clearCache } from './lib/settings.js';
+import { translateFullBook, cancelFullBookTranslation } from './lib/bookTranslator.js';
 
 // ============================================================
 // DOM Elements
@@ -299,6 +300,10 @@ function openSettings() {
     $('target-lang').value = settings.targetLang;
     $('translation-style').value = settings.translationStyle;
 
+    // Font selector
+    const savedFont = localStorage.getItem('biread_font') || 'default';
+    $('reading-font').value = savedFont;
+
     // Set active engine tab
     setActiveEngine(settings.engine);
 
@@ -341,6 +346,12 @@ function saveCurrentSettings() {
     };
 
     saveSettings(settings);
+
+    // Save and apply font
+    const fontValue = $('reading-font').value;
+    localStorage.setItem('biread_font', fontValue);
+    applyFont(fontValue);
+
     closeSettings();
 }
 
@@ -411,6 +422,15 @@ function setupEventListeners() {
         alert(`已清除 ${removed} 条翻译缓存`);
     });
 
+    // Full-book translation
+    $('btn-translate-book').addEventListener('click', openFullBookModal);
+    $('btn-fullbook-close').addEventListener('click', closeFullBookModal);
+    $('fullbook-modal').querySelector('.modal-backdrop').addEventListener('click', closeFullBookModal);
+    $('btn-fullbook-start').addEventListener('click', startFullBookTranslation);
+    $('btn-fullbook-cancel').addEventListener('click', () => {
+        cancelFullBookTranslation();
+    });
+
     // Chapter navigation
     btnPrevChapter.addEventListener('click', () => {
         if (currentChapterIndex > 0) {
@@ -478,14 +498,84 @@ function initDisplayMode() {
 }
 
 // ============================================================
+// Font Selector
+// ============================================================
+function initFont() {
+    const saved = localStorage.getItem('biread_font') || 'default';
+    applyFont(saved);
+}
+
+function applyFont(fontValue) {
+    const readingArea = document.querySelector('.reading-area');
+    if (!readingArea) return;
+
+    if (fontValue === 'default') {
+        readingArea.style.fontFamily = '';
+    } else {
+        readingArea.style.fontFamily = fontValue;
+    }
+}
+
+// ============================================================
+// Full-Book Translation
+// ============================================================
+function openFullBookModal() {
+    if (!isConfigured()) {
+        alert('请先在设置中配置 API Key 和模型');
+        return;
+    }
+    const modal = $('fullbook-modal');
+    $('fullbook-progress-area').style.display = 'none';
+    $('btn-fullbook-start').style.display = '';
+    $('btn-fullbook-cancel').style.display = 'none';
+    $('fullbook-progress-bar').style.width = '0%';
+    $('fullbook-status').textContent = '准备中...';
+    modal.classList.add('active');
+}
+
+function closeFullBookModal() {
+    cancelFullBookTranslation();
+    $('fullbook-modal').classList.remove('active');
+}
+
+async function startFullBookTranslation() {
+    $('fullbook-progress-area').style.display = 'block';
+    $('btn-fullbook-start').style.display = 'none';
+    $('btn-fullbook-cancel').style.display = '';
+
+    try {
+        await translateFullBook(
+            bookMeta?.title || 'Book',
+            (current, total, status) => {
+                const pct = Math.round((current / total) * 100);
+                $('fullbook-progress-bar').style.width = `${pct}%`;
+                $('fullbook-status').textContent = status;
+            }
+        );
+
+        $('fullbook-status').textContent = '✅ 翻译完成！EPUB 已下载。';
+        $('btn-fullbook-cancel').style.display = 'none';
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            $('fullbook-status').textContent = '❌ 翻译已取消';
+        } else {
+            $('fullbook-status').textContent = `❌ 翻译失败: ${err.message}`;
+        }
+        $('btn-fullbook-cancel').style.display = 'none';
+        $('btn-fullbook-start').style.display = '';
+    }
+}
+
+// ============================================================
 // Init
 // ============================================================
 function init() {
     initTheme();
     initDisplayMode();
+    initFont();
     setupFileUpload();
     setupEventListeners();
-    loadSettings(); // Pre-load settings
+    loadSettings();
 }
 
 init();
