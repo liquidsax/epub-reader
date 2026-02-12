@@ -530,17 +530,22 @@ textarea {
   margin: 1rem 0;
 }
 
-/* Bilingual paragraph block */
+/* Bilingual paragraph group */
 .bi-paragraph {
   position: relative;
-  margin-bottom: 1.5em;
-  transition: all var(--transition-fast);
-  padding: 0.4rem 0.75rem;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
+  margin-bottom: 1.8em;
 }
 
-.bi-paragraph:hover {
+/* Individual sentence block */
+.bi-sentence {
+  margin-bottom: 0.4em;
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.bi-sentence:hover {
   background: var(--bg-tertiary);
 }
 
@@ -550,14 +555,14 @@ textarea {
 
 .bi-translation {
   display: block;
-  margin-top: 0.6em;
-  padding: 0.6rem 0 0.6rem 1.2rem;
+  margin-top: 0.3em;
+  padding: 0.3rem 0 0.3rem 1rem;
   border-left: 4px solid var(--translation-border);
   background: none;
   color: var(--translation-text);
   font-family: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
   font-size: 1.08rem;
-  line-height: 2;
+  line-height: 1.9;
   font-weight: 500;
   animation: slideIn 0.3s var(--ease-out);
 }
@@ -578,8 +583,8 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 0.5em;
-  padding: 0.5rem 0.75rem;
+  margin-top: 0.3em;
+  padding: 0.4rem 0.75rem;
   background: var(--bg-tertiary);
   border-radius: var(--radius-sm);
   color: var(--text-tertiary);
@@ -604,8 +609,8 @@ textarea {
 
 .bi-error {
   display: block;
-  margin-top: 0.5em;
-  padding: 0.5rem 0.75rem;
+  margin-top: 0.3em;
+  padding: 0.4rem 0.75rem;
   background: rgba(239, 68, 68, 0.08);
   border-left: 3px solid var(--danger);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
@@ -693,21 +698,20 @@ textarea {
   color: var(--accent);
 }
 
-/* Translation-only mode — hide original text, restyle translation */
+/* Translation-only mode */
 [data-display-mode="translation-only"] .bi-original {
   display: none;
 }
 
 [data-display-mode="translation-only"] .bi-translation {
-  background: none;
   border-left: none;
   color: var(--text-primary);
   padding: 0;
   margin-top: 0;
-  font-size: 1.1em;
+  font-size: 1.1rem;
 }
 
-/* Original-only mode — hide translation */
+/* Original-only mode */
 [data-display-mode="original-only"] .bi-translation {
   display: none;
 }

@@ -1,10 +1,10 @@
 /**
  * Reader Module — Core Reading Logic
- * Renders chapter content as bilingual paragraphs
- * Manages translation state per paragraph
+ * Renders chapter content as sentence-level bilingual pairs
+ * Manages translation state per sentence
  */
 
-import { translateParagraph, translateChapter } from './translator.js';
+import { translateParagraph } from './translator.js';
 import { getBookId } from './epubParser.js';
 
 let _container = null;
@@ -24,7 +24,37 @@ export function initReader(container, onProgress) {
 }
 
 /**
+ * Split text into sentences
+ * Handles English (.!?) and Chinese (。！？) punctuation
+ */
+function splitSentences(text) {
+    if (!text || !text.trim()) return [];
+
+    // Split on sentence-ending punctuation
+    // Keep the punctuation with the sentence
+    const parts = text.match(/[^.!?。！？]+[.!?。！？]+[\s]*/g);
+
+    if (!parts) {
+        // No sentence punctuation found — return whole text as one sentence
+        return [text.trim()];
+    }
+
+    // Clean up and filter empty parts
+    const sentences = parts.map(s => s.trim()).filter(s => s.length > 0);
+
+    // If there's trailing text after the last punctuation, append it
+    const joined = sentences.join('');
+    const remainder = text.slice(joined.length).trim();
+    if (remainder) {
+        sentences.push(remainder);
+    }
+
+    return sentences;
+}
+
+/**
  * Render chapter content into the reader
+ * Each paragraph is split into sentences for line-by-line bilingual display
  * @param {Array} paragraphs - From epubParser.getChapterContent()
  * @param {number} chapterIndex
  */
@@ -36,9 +66,8 @@ export function renderChapter(paragraphs, chapterIndex) {
 
     _container.innerHTML = '';
 
-    paragraphs.forEach((p, index) => {
+    paragraphs.forEach((p, pIndex) => {
         if (p.isImage) {
-            // Images — render directly, no translation
             const imgWrapper = document.createElement('div');
             imgWrapper.className = 'bi-paragraph';
             imgWrapper.innerHTML = p.html;
@@ -46,38 +75,81 @@ export function renderChapter(paragraphs, chapterIndex) {
             return;
         }
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'bi-paragraph';
-        wrapper.dataset.index = index;
+        // Create a paragraph group
+        const paraGroup = document.createElement('div');
+        paraGroup.className = 'bi-paragraph';
+        paraGroup.dataset.paraIndex = pIndex;
 
-        // Original text
-        const original = document.createElement('div');
-        original.className = 'bi-original';
-        original.innerHTML = p.html;
-        wrapper.appendChild(original);
+        // Headings — keep as single block (don't split sentences)
+        if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(p.tag)) {
+            const sentenceWrapper = document.createElement('div');
+            sentenceWrapper.className = 'bi-sentence';
+            sentenceWrapper.dataset.pindex = pIndex;
+            sentenceWrapper.dataset.sindex = 0;
 
-        // Check if we have a cached translation
-        const bookId = getBookId();
-        const cacheKey = `biread_cache_${_hashString(bookId)}_${chapterIndex}_${index}_${_hashString(_getModel())}`;
-        const cached = localStorage.getItem(cacheKey);
+            const original = document.createElement('div');
+            original.className = 'bi-original';
+            original.innerHTML = p.html;
+            sentenceWrapper.appendChild(original);
 
-        if (cached) {
-            const trans = document.createElement('span');
-            trans.className = 'bi-translation';
-            trans.textContent = cached;
-            wrapper.appendChild(trans);
+            // Check cached translation
+            const cached = _getCachedTranslation(chapterIndex, pIndex, 0);
+            if (cached) {
+                const trans = document.createElement('div');
+                trans.className = 'bi-translation';
+                trans.textContent = cached;
+                sentenceWrapper.appendChild(trans);
+            }
+
+            sentenceWrapper.addEventListener('click', () => {
+                translateSingleSentence(sentenceWrapper, p.text, pIndex, 0);
+            });
+
+            paraGroup.appendChild(sentenceWrapper);
+        } else {
+            // Regular paragraph — split into sentences
+            const sentences = splitSentences(p.text);
+
+            sentences.forEach((sentence, sIndex) => {
+                const sentenceWrapper = document.createElement('div');
+                sentenceWrapper.className = 'bi-sentence';
+                sentenceWrapper.dataset.pindex = pIndex;
+                sentenceWrapper.dataset.sindex = sIndex;
+
+                const original = document.createElement('div');
+                original.className = 'bi-original';
+                original.textContent = sentence;
+                sentenceWrapper.appendChild(original);
+
+                // Check cached translation
+                const cached = _getCachedTranslation(chapterIndex, pIndex, sIndex);
+                if (cached) {
+                    const trans = document.createElement('div');
+                    trans.className = 'bi-translation';
+                    trans.textContent = cached;
+                    sentenceWrapper.appendChild(trans);
+                }
+
+                sentenceWrapper.addEventListener('click', () => {
+                    translateSingleSentence(sentenceWrapper, sentence, pIndex, sIndex);
+                });
+
+                paraGroup.appendChild(sentenceWrapper);
+            });
         }
 
-        // Click to translate single paragraph
-        wrapper.addEventListener('click', () => {
-            translateSingleParagraph(wrapper, p.text, index);
-        });
-
-        _container.appendChild(wrapper);
+        _container.appendChild(paraGroup);
     });
 
-    // Scroll to top
     _container.scrollTop = 0;
+}
+
+/** Check cached translation using sentence-level key */
+function _getCachedTranslation(chapterIndex, pIndex, sIndex) {
+    const bookId = getBookId();
+    const model = _getModel();
+    const cacheKey = `biread_cache_${_hashString(bookId)}_${chapterIndex}_${pIndex}_${sIndex}_${_hashString(model)}`;
+    return localStorage.getItem(cacheKey);
 }
 
 /** Get current model from settings */
@@ -103,15 +175,12 @@ function _hashString(str) {
 }
 
 /**
- * Translate a single paragraph on click
+ * Translate a single sentence on click
  */
-async function translateSingleParagraph(wrapper, text, index) {
+async function translateSingleSentence(wrapper, text, pIndex, sIndex) {
     if (!text.trim() || text.trim().length < 3) return;
-
-    // Don't re-translate if already translated
     if (wrapper.querySelector('.bi-translation')) return;
 
-    // Show loading
     const loading = document.createElement('span');
     loading.className = 'bi-loading';
     loading.textContent = '翻译中...';
@@ -119,13 +188,15 @@ async function translateSingleParagraph(wrapper, text, index) {
 
     try {
         const bookId = getBookId();
+        // Use sentence-level cache key: pIndex_sIndex
+        const cacheId = `${pIndex}_${sIndex}`;
         const translation = await translateParagraph(
-            text, bookId, _currentChapterIndex, index, null
+            text, bookId, _currentChapterIndex, cacheId, null
         );
 
         loading.remove();
 
-        const trans = document.createElement('span');
+        const trans = document.createElement('div');
         trans.className = 'bi-translation';
         trans.textContent = translation;
         wrapper.appendChild(trans);
@@ -137,44 +208,34 @@ async function translateSingleParagraph(wrapper, text, index) {
         errorEl.addEventListener('click', (e) => {
             e.stopPropagation();
             errorEl.remove();
-            translateSingleParagraph(wrapper, text, index);
+            translateSingleSentence(wrapper, text, pIndex, sIndex);
         });
         wrapper.appendChild(errorEl);
     }
 }
 
 /**
- * Translate entire chapter
- * @returns {Promise<void>}
+ * Translate entire chapter — sentence by sentence
  */
 export async function translateCurrentChapter() {
     if (_currentParagraphs.length === 0) return;
 
-    // Cancel any in-progress translation
     cancelTranslation();
-
     _abortController = new AbortController();
 
-    const textsToTranslate = _currentParagraphs
-        .filter(p => !p.isImage && p.text.trim().length >= 3);
-
-    const textIndexMap = _currentParagraphs
-        .map((p, i) => ({ p, i }))
-        .filter(({ p }) => !p.isImage && p.text.trim().length >= 3);
-
-    const bookId = getBookId();
+    const allSentences = _container.querySelectorAll('.bi-sentence[data-pindex]');
+    const total = allSentences.length;
     let translatedCount = 0;
-    const total = textIndexMap.length;
 
     try {
-        for (const { p, i } of textIndexMap) {
+        for (const sentenceEl of allSentences) {
             if (_abortController.signal.aborted) break;
 
-            const wrapper = _container?.querySelector(`[data-index="${i}"]`);
-            if (!wrapper) continue;
+            const pIndex = parseInt(sentenceEl.dataset.pindex);
+            const sIndex = parseInt(sentenceEl.dataset.sindex);
 
             // Skip already translated
-            if (wrapper.querySelector('.bi-translation')) {
+            if (sentenceEl.querySelector('.bi-translation')) {
                 translatedCount++;
                 if (_onTranslationProgress) {
                     _onTranslationProgress(translatedCount, total);
@@ -182,30 +243,39 @@ export async function translateCurrentChapter() {
                 continue;
             }
 
+            // Get sentence text from the original element
+            const originalEl = sentenceEl.querySelector('.bi-original');
+            const text = originalEl?.textContent?.trim();
+            if (!text || text.length < 3) {
+                translatedCount++;
+                continue;
+            }
+
             // Show loading
-            let loading = wrapper.querySelector('.bi-loading');
+            let loading = sentenceEl.querySelector('.bi-loading');
             if (!loading) {
                 loading = document.createElement('span');
                 loading.className = 'bi-loading';
                 loading.textContent = '翻译中...';
-                wrapper.appendChild(loading);
+                sentenceEl.appendChild(loading);
             }
 
             try {
+                const bookId = getBookId();
+                const cacheId = `${pIndex}_${sIndex}`;
                 const translation = await translateParagraph(
-                    p.text, bookId, _currentChapterIndex, i, _abortController.signal
+                    text, bookId, _currentChapterIndex, cacheId, _abortController.signal
                 );
 
                 loading.remove();
 
-                // Remove any existing error
-                const existingError = wrapper.querySelector('.bi-error');
+                const existingError = sentenceEl.querySelector('.bi-error');
                 if (existingError) existingError.remove();
 
-                const trans = document.createElement('span');
+                const trans = document.createElement('div');
                 trans.className = 'bi-translation';
                 trans.textContent = translation;
-                wrapper.appendChild(trans);
+                sentenceEl.appendChild(trans);
             } catch (err) {
                 loading.remove();
                 if (err.name === 'AbortError') break;
@@ -213,7 +283,7 @@ export async function translateCurrentChapter() {
                 const errorEl = document.createElement('span');
                 errorEl.className = 'bi-error';
                 errorEl.textContent = `翻译失败: ${err.message}`;
-                wrapper.appendChild(errorEl);
+                sentenceEl.appendChild(errorEl);
             }
 
             translatedCount++;
@@ -235,7 +305,6 @@ export function cancelTranslation() {
         _abortController = null;
     }
 
-    // Remove all loading indicators
     if (_container) {
         _container.querySelectorAll('.bi-loading').forEach(el => el.remove());
     }
