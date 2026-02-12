@@ -533,32 +533,31 @@ textarea {
 /* Bilingual paragraph block */
 .bi-paragraph {
   position: relative;
-  margin-bottom: 1.2em;
+  margin-bottom: 1.5em;
   transition: all var(--transition-fast);
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
 }
 
 .bi-paragraph:hover {
   background: var(--bg-tertiary);
-  border-radius: var(--radius-sm);
-  padding: 0.1rem 0.6rem;
-  margin-left: -0.6rem;
-  margin-right: -0.6rem;
 }
 
 .bi-original {
-  /* Original text — normal styling */
+  transition: opacity var(--transition-fast);
 }
 
 .bi-translation {
   display: block;
-  margin-top: 0.35em;
-  padding: 0.5rem 0.75rem;
+  margin-top: 0.5em;
+  padding: 0.75rem 1rem;
   background: var(--translation-bg);
   border-left: 3px solid var(--translation-border);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   color: var(--translation-text);
-  font-size: 0.95em;
-  line-height: 1.75;
+  font-size: 1.05em;
+  line-height: 1.85;
   animation: slideIn 0.3s var(--ease-out);
 }
 
@@ -578,12 +577,12 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 0.35em;
-  padding: 0.4rem 0.75rem;
+  margin-top: 0.5em;
+  padding: 0.5rem 0.75rem;
   background: var(--bg-tertiary);
   border-radius: var(--radius-sm);
   color: var(--text-tertiary);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .bi-loading::before {
@@ -604,18 +603,112 @@ textarea {
 
 .bi-error {
   display: block;
-  margin-top: 0.35em;
-  padding: 0.4rem 0.75rem;
+  margin-top: 0.5em;
+  padding: 0.5rem 0.75rem;
   background: rgba(239, 68, 68, 0.08);
   border-left: 3px solid var(--danger);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   color: var(--danger);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   cursor: pointer;
 }
 
 .bi-error:hover {
   background: rgba(239, 68, 68, 0.12);
+}
+
+/* ============================================================
+   DISPLAY MODES
+   ============================================================ */
+/* Display mode switcher dropdown */
+.display-mode-switcher {
+  position: relative;
+}
+
+.display-mode-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 0.4rem;
+  z-index: 150;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: all var(--transition-fast);
+}
+
+.display-mode-menu.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.mode-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.mode-option:hover {
+  background: var(--bg-hover);
+}
+
+.mode-option.active {
+  background: var(--accent-soft);
+}
+
+.mode-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.mode-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.mode-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mode-desc {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+}
+
+.mode-option.active .mode-name {
+  color: var(--accent);
+}
+
+/* Translation-only mode — hide original text, restyle translation */
+[data-display-mode="translation-only"] .bi-original {
+  display: none;
+}
+
+[data-display-mode="translation-only"] .bi-translation {
+  background: none;
+  border-left: none;
+  color: var(--text-primary);
+  padding: 0;
+  margin-top: 0;
+  font-size: 1.1em;
+}
+
+/* Original-only mode — hide translation */
+[data-display-mode="original-only"] .bi-translation {
+  display: none;
 }
 
 /* Chapter Navigation */

@@ -104,6 +104,36 @@
           </svg>
           <span>翻译本章</span>
         </button>
+        <div class="display-mode-switcher">
+          <button id="btn-display-mode" class="toolbar-btn" title="显示模式">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 3h20v18H2zM2 9h20M2 15h20" />
+            </svg>
+          </button>
+          <div id="display-mode-menu" class="display-mode-menu">
+            <button class="mode-option active" data-mode="bilingual">
+              <span class="mode-icon">📖</span>
+              <div class="mode-info">
+                <span class="mode-name">双语对照</span>
+                <span class="mode-desc">原文 + 译文交替显示</span>
+              </div>
+            </button>
+            <button class="mode-option" data-mode="translation-only">
+              <span class="mode-icon">🇨🇳</span>
+              <div class="mode-info">
+                <span class="mode-name">仅译文</span>
+                <span class="mode-desc">只显示翻译后的内容</span>
+              </div>
+            </button>
+            <button class="mode-option" data-mode="original-only">
+              <span class="mode-icon">🇬🇧</span>
+              <div class="mode-info">
+                <span class="mode-name">仅原文</span>
+                <span class="mode-desc">只显示原始内容</span>
+              </div>
+            </button>
+          </div>
+        </div>
         <button id="btn-theme-toggle" class="toolbar-btn" title="切换主题">
           <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="5" />

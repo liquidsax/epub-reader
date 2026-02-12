@@ -54,6 +54,7 @@ const siliconflowSettings = $('siliconflow-settings');
 let currentChapterIndex = 0;
 let bookMeta = null;
 let isTranslating = false;
+let currentDisplayMode = localStorage.getItem('biread_display_mode') || 'bilingual';
 
 // ============================================================
 // Theme
@@ -356,6 +357,31 @@ function setupEventListeners() {
     btnTranslateChapter.addEventListener('click', startTranslation);
     btnCancelTranslate.addEventListener('click', stopTranslation);
 
+    // Display mode toggle
+    const btnDisplayMode = $('btn-display-mode');
+    const displayModeMenu = $('display-mode-menu');
+
+    btnDisplayMode.addEventListener('click', (e) => {
+        e.stopPropagation();
+        displayModeMenu.classList.toggle('active');
+    });
+
+    document.addEventListener('click', () => {
+        displayModeMenu.classList.remove('active');
+    });
+
+    displayModeMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
+    document.querySelectorAll('.mode-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const mode = option.dataset.mode;
+            setDisplayMode(mode);
+            displayModeMenu.classList.remove('active');
+        });
+    });
+
     // Theme (both reader and upload screen)
     btnThemeToggle.addEventListener('click', toggleTheme);
     $('btn-theme-toggle-upload').addEventListener('click', toggleTheme);
@@ -426,10 +452,31 @@ function setupEventListeners() {
 }
 
 // ============================================================
+// Display Mode
+// ============================================================
+function setDisplayMode(mode) {
+    currentDisplayMode = mode;
+    localStorage.setItem('biread_display_mode', mode);
+
+    // Apply to chapter content
+    chapterContent.setAttribute('data-display-mode', mode);
+
+    // Update menu active state
+    document.querySelectorAll('.mode-option').forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.mode === mode);
+    });
+}
+
+function initDisplayMode() {
+    setDisplayMode(currentDisplayMode);
+}
+
+// ============================================================
 // Init
 // ============================================================
 function init() {
     initTheme();
+    initDisplayMode();
     setupFileUpload();
     setupEventListeners();
     loadSettings(); // Pre-load settings
