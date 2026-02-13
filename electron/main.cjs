@@ -1,6 +1,13 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
+// ── Performance optimizations ──
+app.commandLine.appendSwitch('enable-features', 'Metal');          // macOS GPU accel
+app.commandLine.appendSwitch('enable-gpu-rasterization');
+app.commandLine.appendSwitch('enable-zero-copy');
+app.commandLine.appendSwitch('disable-renderer-backgrounding');    // don't throttle hidden
+app.commandLine.appendSwitch('js-flags', '--max-old-space-size=512');
+
 function createWindow() {
     const win = new BrowserWindow({
         width: 1200,
@@ -8,18 +15,25 @@ function createWindow() {
         minWidth: 800,
         minHeight: 600,
         title: 'BiReader',
-        titleBarStyle: 'hiddenInset', // macOS native look
+        titleBarStyle: 'hiddenInset',
+        trafficLightPosition: { x: 16, y: 16 },
+        backgroundColor: '#f8f9fc',        // Avoid white flash on launch
+        show: false,                        // Don't show until ready
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
+            spellcheck: false,              // Disable spellcheck overhead
+            enableBlinkFeatures: '',        // No extra Blink features
+            backgroundThrottling: false,    // Keep performance when unfocused
         }
     });
 
-    // In production, load the built files
-    // In dev, this file isn't used — use `npm run dev` instead
-    win.loadFile(path.join(__dirname, '../dist/index.html'));
+    // Show window only after content is ready (eliminates perceived lag)
+    win.once('ready-to-show', () => {
+        win.show();
+    });
 
-    // Remove menu bar on Windows/Linux
+    win.loadFile(path.join(__dirname, '../dist/index.html'));
     win.setMenuBarVisibility(false);
 }
 
@@ -27,7 +41,6 @@ app.whenReady().then(() => {
     createWindow();
 
     app.on('activate', () => {
-        // macOS: re-create window when dock icon is clicked
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow();
         }
@@ -35,6 +48,5 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-    // Quit on all platforms (including macOS for simplicity)
     app.quit();
 });
