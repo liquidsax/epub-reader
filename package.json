@@ -6,7 +6,7 @@
   "author": "BiReader Team",
   "license": "MIT",
   "type": "module",
-  "main": "electron/main.js",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
