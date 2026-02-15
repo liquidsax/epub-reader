@@ -1,0 +1,146 @@
+**[🇨🇳 中文](./README.md) | 🇬🇧 English**
+
+---
+
+<p align="center">
+  <h1 align="center">📖 BiReader</h1>
+  <p align="center">
+    <strong>A bilingual EPUB translation reader</strong><br/>
+    Sentence-by-sentence bilingual display · Multiple display modes · Full-book translation & export · macOS & Windows desktop app
+  </p>
+  <p align="center">
+    <img src="https://img.shields.io/badge/version-0.1.0--beta-blue" alt="version" />
+    <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey" alt="platform" />
+    <img src="https://img.shields.io/badge/license-MIT-green" alt="license" />
+  </p>
+</p>
+
+---
+
+## ✨ Features
+
+- **📚 EPUB Parsing** — Load any `.epub` file, navigate chapters with sidebar TOC
+- **🔤 Sentence-by-Sentence Bilingual Display** — Each sentence shows original + translation side by side
+- **🌍 3 Display Modes** — Bilingual, Translation Only, Original Only
+- **📥 Full-Book Translation & Export** — Translate the entire book and download a bilingual `.epub`
+- **🎨 3 Themes** — Light ☀️, Sepia 📖 (eye-care), Dark 🌙
+- **🔠 Font Selector** — Choose from 8 fonts including Microsoft YaHei, PingFang, Songti, KaiTi, Georgia, Arial
+- **🔌 Multi-Engine API** — Supports Doubao and SiliconFlow translation APIs
+- **💾 Translation Cache** — Cached in localStorage, no repeated API calls
+- **⚡ Smart Sentence Splitting** — Handles numbered lists (1. 2.), decimals (3.14), abbreviations (Mr. Dr.)
+
+## 🚀 Quick Start
+
+### Run in Browser (Development)
+
+```bash
+git clone https://github.com/liquidsax/bireader.git
+cd bireader
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000` and upload an EPUB file.
+
+### Run as Desktop App
+
+```bash
+npm run electron:dev
+```
+
+### Build Installers
+
+```bash
+npm run dist:mac    # macOS (.dmg for Intel + Apple Silicon)
+npm run dist:win    # Windows (.exe installer + portable)
+npm run dist:all    # Both platforms
+```
+
+Output files will be in the `release/` directory.
+
+## ⚙️ Configuration
+
+Click the ⚙️ Settings button (top-right) to configure:
+
+| Setting | Description |
+|---------|-------------|
+| **Translation Engine** | Doubao (豆包) or SiliconFlow (硅基流动) |
+| **API Key** | Your API key for the selected engine |
+| **Model** | DeepSeek-V3, Qwen2.5, GLM-4 etc. |
+| **Source / Target Language** | English, Japanese, Korean, French, German, Spanish → Simplified Chinese, Traditional Chinese, etc. |
+| **Translation Style** | Faithful, Natural, Academic, Literary |
+| **Reading Font** | 8 font options for the reading area |
+
+Both engines use the OpenAI-compatible `/v1/chat/completions` format — any compatible API can work.
+
+## 🏗️ Architecture
+
+```
+epub-reader/
+├── electron/
+│   └── main.cjs            # Electron main process
+├── src/
+│   ├── lib/
+│   │   ├── epubParser.js    # EPUB loading & paragraph extraction
+│   │   ├── reader.js        # Sentence-level bilingual rendering
+│   │   ├── translator.js    # API calls & translation caching
+│   │   ├── bookTranslator.js # Full-book translation + EPUB export
+│   │   └── settings.js      # Settings management (localStorage)
+│   ├── main.js              # App entry point & UI wiring
+│   └── style.css            # Design system & all styles
+├── index.html               # Single-page application
+├── vite.config.js            # Vite build config
+└── package.json              # Dependencies & Electron build config
+```
+
+### Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | Vanilla JavaScript + CSS (no framework) |
+| **EPUB Parsing** | [epub.js](https://github.com/futurepress/epub.js) |
+| **Build Tool** | [Vite](https://vitejs.dev/) |
+| **Desktop App** | [Electron](https://www.electronjs.org/) |
+| **Packaging** | [electron-builder](https://www.electron.build/) |
+| **EPUB Export** | [JSZip](https://stuk.github.io/jszip/) |
+
+## 📖 Usage Guide
+
+### Reading an EPUB
+
+1. Click the drop zone or drag & drop an `.epub` file
+2. Navigate chapters using the sidebar (☰) or arrow keys ← →
+3. Click any sentence to translate it individually
+4. Click **"翻译本章"** to translate the entire chapter
+5. Use the display mode toggle to switch between bilingual / translation-only / original-only
+
+### Full-Book Translation
+
+1. Click the 📖+ button in the toolbar
+2. Click **"开始翻译"** — progress bar shows chapter-by-chapter status
+3. When complete, a bilingual `.epub` file auto-downloads
+4. The exported EPUB contains original + translated text for every paragraph
+
+### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `←` | Previous chapter |
+| `→` | Next chapter |
+| `Ctrl/⌘ + T` | Translate current chapter |
+| `Esc` | Close sidebar / settings |
+
+## 🤝 Contributing
+
+Contributions are welcome! Here are some areas that could use help:
+
+- [ ] App icon design (currently using Electron default)
+- [ ] macOS / Windows code signing
+- [ ] More translation engine support (Google, DeepL, OpenAI)
+- [ ] Reading progress persistence
+- [ ] Bookmarks & highlights
+- [ ] Auto-update mechanism
+
+## 📄 License
+
+MIT © BiReader Team
